@@ -21,7 +21,16 @@ function Suppliers() {
   };
 
   useEffect(() => {
-    loadSuppliers();
+    const fetchSuppliers = async () => {
+      try {
+        const response = await getSuppliers();
+        setSuppliers(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchSuppliers();
   }, []);
 
   const clearForm = () => {
