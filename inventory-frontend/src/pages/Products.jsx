@@ -21,7 +21,16 @@ function Products() {
   };
 
   useEffect(() => {
-    loadProducts();
+    const fetchProducts = async () => {
+      try {
+        const response = await getProducts();
+        setProducts(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   const clearForm = () => {

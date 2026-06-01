@@ -24,7 +24,17 @@ function Orders() {
   };
 
   useEffect(() => {
-    loadData();
+    const fetchData = async () => {
+      try {
+        const [orderRes, productRes] = await Promise.all([getOrders(), getProducts()]);
+        setOrders(orderRes.data);
+        setProducts(productRes.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const clearForm = () => {

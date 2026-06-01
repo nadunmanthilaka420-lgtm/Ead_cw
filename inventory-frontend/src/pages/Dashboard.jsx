@@ -11,7 +11,7 @@ function Dashboard() {
   const [totals, setTotals] = useState({ products: 0, suppliers: 0, orders: 0, lowStock: 0 });
 
   useEffect(() => {
-    const loadCounts = async () => {
+    const fetchCounts = async () => {
       try {
         const [productRes, supplierRes, orderRes, stockRes] = await Promise.all([
           getProducts(),
@@ -35,7 +35,7 @@ function Dashboard() {
       }
     };
 
-    loadCounts();
+    fetchCounts();
   }, []);
 
   return (

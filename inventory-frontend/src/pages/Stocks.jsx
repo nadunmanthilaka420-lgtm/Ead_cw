@@ -24,7 +24,17 @@ function Stocks() {
   };
 
   useEffect(() => {
-    loadData();
+    const fetchData = async () => {
+      try {
+        const [stockRes, productRes] = await Promise.all([getStocks(), getProducts()]);
+        setStocks(stockRes.data);
+        setProducts(productRes.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const clearForm = () => {

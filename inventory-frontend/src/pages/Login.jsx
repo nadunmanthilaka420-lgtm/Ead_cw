@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/authService";
 
@@ -7,13 +7,20 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
   const handleLogin = async (event) => {
     event.preventDefault();
 
     try {
       const response = await login({ email, password });
       localStorage.setItem("token", response.data.token);
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       alert("Login failed. Please check your credentials.");
     }
@@ -27,13 +34,7 @@ function Login() {
           <form onSubmit={handleLogin}>
             <div className="mb-3">
               <label className="form-label">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required/>
             </div>
             <div className="mb-3">
               <label className="form-label">Password</label>
