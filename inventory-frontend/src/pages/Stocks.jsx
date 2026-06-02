@@ -12,29 +12,22 @@ function Stocks() {
   const [minimumLevel, setMinimumLevel] = useState(0);
   const [warehouseLocation, setWarehouseLocation] = useState("");
   const [selectedStock, setSelectedStock] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
     try {
       const [stockRes, productRes] = await Promise.all([getStocks(), getProducts()]);
-      setStocks(stockRes.data);
-      setProducts(productRes.data);
+      setStocks(stockRes.data || []);
+      setProducts(productRes.data || []);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [stockRes, productRes] = await Promise.all([getStocks(), getProducts()]);
-        setStocks(stockRes.data);
-        setProducts(productRes.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchData();
+    loadData();
   }, []);
 
   const clearForm = () => {
@@ -71,6 +64,7 @@ function Stocks() {
       loadData();
     } catch (error) {
       console.error(error);
+      alert("Error saving stock entry.");
     }
   };
 
@@ -83,114 +77,143 @@ function Stocks() {
   };
 
   const remove = async (id) => {
-    if (!window.confirm("Delete this stock record?")) return;
-    await deleteStock(id);
-    loadData();
+    if (!window.confirm("Are you sure you want to delete this stock entry?")) return;
+    try {
+      await deleteStock(id);
+      loadData();
+    } catch (error) {
+      console.error(error);
+      alert("Error deleting stock entry.");
+    }
   };
 
   return (
-    <div className="d-flex">
+    <div className="d-flex" style={{ background: "var(--bg-gradient)", minHeight: "100vh" }}>
       <Sidebar />
-      <div className="flex-grow-1 p-4">
-        <Navbar title="Stocks" />
-        <div className="card mb-4">
-          <div className="card-body">
-            <h5>{selectedStock ? "Update Stock" : "Add Stock"}</h5>
-            <form onSubmit={save} className="row g-3">
-              <div className="col-md-6">
-                <label className="form-label">Product</label>
-                <select className="form-select" value={productId} onChange={(e) => setProductId(e.target.value)}>
-                  <option value="">Select product</option>
-                  {products.map((product) => (
-                    <option key={product.productId} value={product.productId}>
-                      {product.productName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Quantity Available</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={quantityAvailable}
-                  onChange={(e) => setQuantityAvailable(e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Minimum Level</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={minimumLevel}
-                  onChange={(e) => setMinimumLevel(e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Warehouse Location</label>
-                <input
-                  className="form-control"
-                  value={warehouseLocation}
-                  onChange={(e) => setWarehouseLocation(e.target.value)}
-                />
-              </div>
-              <div className="col-12 d-flex gap-2">
-                <button className="btn btn-success" type="submit">
-                  {selectedStock ? "Update" : "Add"}
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={clearForm}>
-                  Clear
-                </button>
-              </div>
-            </form>
-          </div>
+      <div className="flex-grow-1 p-4" style={{ overflowY: "auto", maxHeight: "100vh" }}>
+        <Navbar title="Inventory Stock Levels" />
+
+        {/* Form Card */}
+        <div className="glass-card p-4 mb-4">
+          <h5 className="mb-4 text-white fw-bold">
+            {selectedStock ? "⚙️ Edit Stock Entry" : "➕ Register Stock Balance"}
+          </h5>
+          <form onSubmit={save} className="row g-3">
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label-custom">Select Product</label>
+              <select 
+                className="form-select-custom" 
+                value={productId} 
+                onChange={(e) => setProductId(e.target.value)}
+                required
+              >
+                <option value="">Choose item...</option>
+                {products.map((product) => (
+                  <option key={product.productId} value={product.productId}>
+                    {product.productName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label-custom">Quantity Available</label>
+              <input
+                type="number"
+                min="0"
+                className="form-control-custom"
+                value={quantityAvailable}
+                onChange={(e) => setQuantityAvailable(e.target.value)}
+                required
+              />
+            </div>
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label-custom">Minimum Level Alert threshold</label>
+              <input
+                type="number"
+                min="0"
+                className="form-control-custom"
+                value={minimumLevel}
+                onChange={(e) => setMinimumLevel(e.target.value)}
+                required
+              />
+            </div>
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label-custom">Warehouse Zone/Location</label>
+              <input
+                className="form-control-custom"
+                value={warehouseLocation}
+                onChange={(e) => setWarehouseLocation(e.target.value)}
+                placeholder="E.g., Aisle 4, Shelf B"
+              />
+            </div>
+            <div className="col-12 d-flex gap-2 mt-4">
+              <button className="btn btn-success-custom px-4 py-2 rounded-3" type="submit">
+                {selectedStock ? "Apply Balance" : "Record Balance"}
+              </button>
+              <button type="button" className="btn btn-secondary-custom px-4 py-2 rounded-3" onClick={clearForm}>
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
 
-        <div className="card">
-          <div className="card-body">
-            <h5>Stock Records</h5>
+        {/* Data Table */}
+        <div className="glass-card p-4">
+          <h5 className="mb-4 text-white fw-bold">📈 Stock Quantities & Warnings</h5>
+          {loading ? (
+            <div className="text-center text-muted-custom py-4">Loading stock logs...</div>
+          ) : stocks.length === 0 ? (
+            <div className="text-center text-muted-custom py-4">No stock logs found. Set up stock for a product above.</div>
+          ) : (
             <div className="table-responsive">
-              <table className="table table-hover mt-3">
+              <table className="table table-custom table-hover-custom m-0">
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Minimum Level</th>
-                    <th>Location</th>
-                    <th>Alert</th>
-                    <th>Action</th>
+                    <th>Stock ID</th>
+                    <th>Product Item</th>
+                    <th>Qty Available</th>
+                    <th>Safety Threshold</th>
+                    <th>Storage Location</th>
+                    <th>Safety Status</th>
+                    <th className="text-end">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {stocks.map((stock) => (
-                    <tr key={stock.stockId}>
-                      <td>{stock.stockId}</td>
-                      <td>{stock.product?.productName}</td>
-                      <td>{stock.quantityAvailable}</td>
-                      <td>{stock.minimumLevel}</td>
-                      <td>{stock.warehouseLocation}</td>
-                      <td>
-                        {stock.quantityAvailable <= stock.minimumLevel ? (
-                          <span className="text-danger">⚠ Low Stock</span>
-                        ) : (
-                          <span className="text-success">OK</span>
-                        )}
-                      </td>
-                      <td>
-                        <button className="btn btn-sm btn-primary me-2" onClick={() => edit(stock)}>
-                          Edit
-                        </button>
-                        <button className="btn btn-sm btn-danger" onClick={() => remove(stock.stockId)}>
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {stocks.map((stock) => {
+                    const isLow = stock.quantityAvailable <= stock.minimumLevel;
+                    return (
+                      <tr key={stock.stockId}>
+                        <td>#{stock.stockId}</td>
+                        <td className="fw-semibold text-white">{stock.product?.productName || "Unknown Product"}</td>
+                        <td className={`fw-bold ${isLow ? "text-danger" : "text-success"}`}>
+                          {stock.quantityAvailable} units
+                        </td>
+                        <td>{stock.minimumLevel} units</td>
+                        <td>
+                          <span className="badge bg-dark border border-secondary text-secondary px-2 py-1 rounded small">
+                            {stock.warehouseLocation || "Unassigned"}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`alert-pill ${isLow ? "danger" : "success"}`}>
+                            {isLow ? "⚠️ Low Stock" : "✅ Stock OK"}
+                          </span>
+                        </td>
+                        <td className="text-end">
+                          <button className="btn btn-sm btn-primary-custom me-2 px-2.5 py-1.5 rounded" onClick={() => edit(stock)}>
+                            ✏️ Edit
+                          </button>
+                          <button className="btn btn-sm btn-danger-custom px-2.5 py-1.5 rounded" onClick={() => remove(stock.stockId)}>
+                            🗑️ Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
@@ -198,3 +221,4 @@ function Stocks() {
 }
 
 export default Stocks;
+

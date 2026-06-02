@@ -12,29 +12,22 @@ function Orders() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [productId, setProductId] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
     try {
       const [orderRes, productRes] = await Promise.all([getOrders(), getProducts()]);
-      setOrders(orderRes.data);
-      setProducts(productRes.data);
+      setOrders(orderRes.data || []);
+      setProducts(productRes.data || []);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [orderRes, productRes] = await Promise.all([getOrders(), getProducts()]);
-        setOrders(orderRes.data);
-        setProducts(productRes.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchData();
+    loadData();
   }, []);
 
   const clearForm = () => {
@@ -43,6 +36,16 @@ function Orders() {
     setStatus("Pending");
     setTotalAmount(0);
     setProductId("");
+  };
+
+  // Automatically default price when product is selected
+  const handleProductChange = (id) => {
+    setProductId(id);
+    if (!id) return;
+    const selectedProd = products.find((p) => p.productId === parseInt(id, 10));
+    if (selectedProd) {
+      setTotalAmount(selectedProd.price || 0);
+    }
   };
 
   const save = async (event) => {
@@ -54,6 +57,7 @@ function Orders() {
     }
 
     const data = {
+      orderId: selectedOrder?.orderId,
       orderDate: orderDate || new Date().toISOString().split("T")[0],
       status,
       totalAmount: parseFloat(totalAmount) || 0,
@@ -74,6 +78,7 @@ function Orders() {
       loadData();
     } catch (error) {
       console.error(error);
+      alert("Error saving order. Check your input values.");
     }
   };
 
@@ -82,110 +87,142 @@ function Orders() {
     setOrderDate(order.orderDate || "");
     setStatus(order.status || "Pending");
     setTotalAmount(order.totalAmount || 0);
-    setProductId(order.product?.productId || "");
+    setProductId(order.product?.productId?.toString() || "");
   };
 
   const changeStatus = async (order, newStatus) => {
-    await updateOrder(order.orderId, { ...order, status: newStatus });
-    loadData();
+    try {
+      await updateOrder(order.orderId, { ...order, status: newStatus });
+      loadData();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update status.");
+    }
   };
 
   const remove = async (id) => {
-    if (!window.confirm("Delete this order?")) return;
-    await deleteOrder(id);
-    loadData();
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
+    try {
+      await deleteOrder(id);
+      loadData();
+    } catch (error) {
+      console.error(error);
+      alert("Error deleting order.");
+    }
   };
 
   return (
-    <div className="d-flex">
+    <div className="d-flex" style={{ background: "var(--bg-gradient)", minHeight: "100vh" }}>
       <Sidebar />
-      <div className="flex-grow-1 p-4">
-        <Navbar title="Orders" />
-        <div className="card mb-4">
-          <div className="card-body">
-            <h5>{selectedOrder ? "Update Order" : "Create Order"}</h5>
-            <form onSubmit={save} className="row g-3">
-              <div className="col-md-4">
-                <label className="form-label">Order Date</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={orderDate}
-                  onChange={(e) => setOrderDate(e.target.value)}
-                />
-              </div>
-              <div className="col-md-4">
-                <label className="form-label">Status</label>
-                <select className="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option>Pending</option>
-                  <option>Approved</option>
-                  <option>Delivered</option>
-                  <option>Cancelled</option>
-                </select>
-              </div>
-              <div className="col-md-4">
-                <label className="form-label">Total Amount</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={totalAmount}
-                  onChange={(e) => setTotalAmount(e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Product</label>
-                <select className="form-select" value={productId} onChange={(e) => setProductId(e.target.value)}>
-                  <option value="">Select product</option>
-                  {products.map((product) => (
-                    <option key={product.productId} value={product.productId}>
-                      {product.productName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-12 d-flex gap-2">
-                <button className="btn btn-success" type="submit">
-                  {selectedOrder ? "Update" : "Save"}
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={clearForm}>
-                  Clear
-                </button>
-              </div>
-            </form>
-          </div>
+      <div className="flex-grow-1 p-4" style={{ overflowY: "auto", maxHeight: "100vh" }}>
+        <Navbar title="Order Transactions" />
+
+        {/* Form Card */}
+        <div className="glass-card p-4 mb-4">
+          <h5 className="mb-4 text-white fw-bold">
+            {selectedOrder ? "⚙️ Edit Order Details" : "➕ Initiate New Order"}
+          </h5>
+          <form onSubmit={save} className="row g-3">
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label-custom">Order Date</label>
+              <input
+                type="date"
+                className="form-control-custom"
+                value={orderDate}
+                onChange={(e) => setOrderDate(e.target.value)}
+              />
+            </div>
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label-custom">Current Status</label>
+              <select className="form-select-custom" value={status} onChange={(e) => setStatus(e.target.value)}>
+                <option>Pending</option>
+                <option>Approved</option>
+                <option>Delivered</option>
+                <option>Cancelled</option>
+              </select>
+            </div>
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label-custom">Selected Product Item</label>
+              <select className="form-select-custom" value={productId} onChange={(e) => handleProductChange(e.target.value)}>
+                <option value="">Choose item...</option>
+                {products.map((product) => (
+                  <option key={product.productId} value={product.productId}>
+                    {product.productName} (${product.price?.toFixed(2)})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label-custom">Total Amount ($)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                className="form-control-custom"
+                value={totalAmount}
+                onChange={(e) => setTotalAmount(e.target.value)}
+                required
+              />
+            </div>
+            <div className="col-12 d-flex gap-2 mt-4">
+              <button className="btn btn-success-custom px-4 py-2 rounded-3" type="submit">
+                {selectedOrder ? "Apply Update" : "Confirm Order"}
+              </button>
+              <button type="button" className="btn btn-secondary-custom px-4 py-2 rounded-3" onClick={clearForm}>
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
 
-        <div className="card">
-          <div className="card-body">
-            <h5>Order List</h5>
+        {/* Data Table */}
+        <div className="glass-card p-4">
+          <h5 className="mb-4 text-white fw-bold">🛒 Sales & Purchase Orders</h5>
+          {loading ? (
+            <div className="text-center text-muted-custom py-4">Loading order invoices...</div>
+          ) : orders.length === 0 ? (
+            <div className="text-center text-muted-custom py-4">No order invoices recorded. Create one above.</div>
+          ) : (
             <div className="table-responsive">
-              <table className="table table-hover mt-3">
+              <table className="table table-custom table-hover-custom m-0">
                 <thead>
                   <tr>
                     <th>Order ID</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Total</th>
-                    <th>Product</th>
-                    <th>Action</th>
+                    <th>Order Date</th>
+                    <th>Product Description</th>
+                    <th>Total Value</th>
+                    <th>Safety Status</th>
+                    <th className="text-end">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {orders.map((order) => (
                     <tr key={order.orderId}>
-                      <td>{order.orderId}</td>
+                      <td>#{order.orderId}</td>
                       <td>{order.orderDate}</td>
-                      <td>{order.status}</td>
-                      <td>{order.totalAmount}</td>
-                      <td>{order.product?.productName}</td>
+                      <td className="fw-semibold text-white">{order.product?.productName || "Unknown Product"}</td>
+                      <td className="fw-bold text-teal">${order.totalAmount?.toFixed(2)}</td>
                       <td>
-                        <button className="btn btn-sm btn-primary me-2" onClick={() => edit(order)}>
-                          Edit
+                        <span className={`status-badge ${order.status?.toLowerCase() || "pending"}`}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="text-end">
+                        <button className="btn btn-sm btn-primary-custom me-2 px-2.5 py-1.5 rounded" onClick={() => edit(order)}>
+                          ✏️ Edit
                         </button>
-                        <button className="btn btn-sm btn-outline-warning me-2" onClick={() => changeStatus(order, "Approved")}>Approve</button>
-                        <button className="btn btn-sm btn-outline-success me-2" onClick={() => changeStatus(order, "Delivered")}>Deliver</button>
-                        <button className="btn btn-sm btn-danger" onClick={() => remove(order.orderId)}>
-                          Delete
+                        {order.status !== "Approved" && order.status !== "Delivered" && (
+                          <button className="btn btn-sm btn-outline-warning me-2 px-2.5 py-1.5 rounded small" onClick={() => changeStatus(order, "Approved")}>
+                            👍 Approve
+                          </button>
+                        )}
+                        {order.status !== "Delivered" && (
+                          <button className="btn btn-sm btn-outline-success me-2 px-2.5 py-1.5 rounded small" onClick={() => changeStatus(order, "Delivered")}>
+                            🚚 Deliver
+                          </button>
+                        )}
+                        <button className="btn btn-sm btn-danger-custom px-2.5 py-1.5 rounded" onClick={() => remove(order.orderId)}>
+                          🗑️ Delete
                         </button>
                       </td>
                     </tr>
@@ -193,7 +230,7 @@ function Orders() {
                 </tbody>
               </table>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
@@ -201,3 +238,4 @@ function Orders() {
 }
 
 export default Orders;
+
