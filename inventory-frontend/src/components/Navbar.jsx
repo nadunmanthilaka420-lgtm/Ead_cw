@@ -20,7 +20,7 @@ function Navbar({ title }) {
           <span className="text-muted-custom small" style={{ fontSize: "0.75rem" }}>System Admin</span>
         </div>
         <button className="btn btn-secondary-custom btn-sm px-3 py-2 rounded-3" onClick={logout}>
-          🚪 Logout
+          Logout
         </button>
       </div>
     </div>
