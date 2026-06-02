@@ -120,7 +120,7 @@ function Orders() {
         {/* Form Card */}
         <div className="glass-card p-4 mb-4">
           <h5 className="mb-4 text-white fw-bold">
-            {selectedOrder ? "⚙️ Edit Order Details" : "➕ Initiate New Order"}
+            {selectedOrder ? "Edit Order Details" : "Initiate New Order"}
           </h5>
           <form onSubmit={save} className="row g-3">
             <div className="col-md-6 col-lg-3">
@@ -177,7 +177,7 @@ function Orders() {
 
         {/* Data Table */}
         <div className="glass-card p-4">
-          <h5 className="mb-4 text-white fw-bold">🛒 Sales & Purchase Orders</h5>
+          <h5 className="mb-4 text-white fw-bold"> Sales & Purchase Orders</h5>
           {loading ? (
             <div className="text-center text-muted-custom py-4">Loading order invoices...</div>
           ) : orders.length === 0 ? (
@@ -209,20 +209,19 @@ function Orders() {
                       </td>
                       <td className="text-end">
                         <button className="btn btn-sm btn-primary-custom me-2 px-2.5 py-1.5 rounded" onClick={() => edit(order)}>
-                          ✏️ Edit
+                          Edit
                         </button>
                         {order.status !== "Approved" && order.status !== "Delivered" && (
-                          <button className="btn btn-sm btn-outline-warning me-2 px-2.5 py-1.5 rounded small" onClick={() => changeStatus(order, "Approved")}>
-                            👍 Approve
+                          <button className="btn btn-sm btn-outline-warning me-2 px-2.5 py-1.5 rounded small" onClick={() => changeStatus(order, "Approved")}>Approve
                           </button>
                         )}
                         {order.status !== "Delivered" && (
                           <button className="btn btn-sm btn-outline-success me-2 px-2.5 py-1.5 rounded small" onClick={() => changeStatus(order, "Delivered")}>
-                            🚚 Deliver
+                             Deliver
                           </button>
                         )}
                         <button className="btn btn-sm btn-danger-custom px-2.5 py-1.5 rounded" onClick={() => remove(order.orderId)}>
-                          🗑️ Delete
+                           Delete
                         </button>
                       </td>
                     </tr>

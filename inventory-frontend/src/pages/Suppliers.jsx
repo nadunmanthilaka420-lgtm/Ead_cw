@@ -88,7 +88,7 @@ function Suppliers() {
         {/* Form Card */}
         <div className="glass-card p-4 mb-4">
           <h5 className="mb-4 text-white fw-bold">
-            {selectedSupplier ? "⚙️ Edit Supplier Details" : "➕ Onboard New Supplier"}
+            {selectedSupplier ? " Edit Supplier Details" : " Onboard New Supplier"}
           </h5>
           <form onSubmit={save} className="row g-3">
             <div className="col-md-6 col-lg-3">
@@ -142,7 +142,7 @@ function Suppliers() {
 
         {/* Data Table */}
         <div className="glass-card p-4">
-          <h5 className="mb-4 text-white fw-bold">🤝 Registered Supply Partners</h5>
+          <h5 className="mb-4 text-white fw-bold"> Registered Supply Partners</h5>
           {loading ? (
             <div className="text-center text-muted-custom py-4">Loading suppliers list...</div>
           ) : suppliers.length === 0 ? (
@@ -170,10 +170,10 @@ function Suppliers() {
                       <td className="text-muted-custom">{supplier.address || "—"}</td>
                       <td className="text-end">
                         <button className="btn btn-sm btn-primary-custom me-2 px-2.5 py-1.5 rounded" onClick={() => edit(supplier)}>
-                          ✏️ Edit
+                           Edit
                         </button>
                         <button className="btn btn-sm btn-danger-custom px-2.5 py-1.5 rounded" onClick={() => remove(supplier.supplierId)}>
-                          🗑️ Delete
+                           Delete
                         </button>
                       </td>
                     </tr>

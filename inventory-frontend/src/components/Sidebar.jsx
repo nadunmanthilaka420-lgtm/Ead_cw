@@ -9,19 +9,19 @@ function Sidebar() {
       </div>
       <div className="nav flex-column gap-1 flex-grow-1">
         <NavLink className="sidebar-nav-link text-decoration-none" to="/dashboard">
-          <span className="nav-icon">📊</span> Dashboard
+          <span className="nav-icon"></span> Dashboard
         </NavLink>
         <NavLink className="sidebar-nav-link text-decoration-none" to="/products">
-          <span className="nav-icon">📦</span> Products
+          <span className="nav-icon"></span> Products
         </NavLink>
         <NavLink className="sidebar-nav-link text-decoration-none" to="/suppliers">
-          <span className="nav-icon">🤝</span> Suppliers
+          <span className="nav-icon"></span> Suppliers
         </NavLink>
         <NavLink className="sidebar-nav-link text-decoration-none" to="/stocks">
-          <span className="nav-icon">📈</span> Stocks
+          <span className="nav-icon"></span> Stocks
         </NavLink>
         <NavLink className="sidebar-nav-link text-decoration-none" to="/orders">
-          <span className="nav-icon">🛒</span> Orders
+          <span className="nav-icon"></span> Orders
         </NavLink>
       </div>
       <div className="pt-4 border-top border-secondary-subtle text-muted-custom small">

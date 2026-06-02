@@ -93,7 +93,7 @@ function Dashboard() {
                   </div>
                   {lowStockItems.length === 0 ? (
                     <div className="text-center text-muted-custom py-4">
-                      🎉 All items are above minimum stock levels!
+                      All items are above minimum stock levels!
                     </div>
                   ) : (
                     <div className="d-flex flex-column gap-3">
@@ -131,7 +131,7 @@ function Dashboard() {
               {/* Recent Orders */}
               <div className="col-12 col-lg-6">
                 <div className="glass-card p-4 h-100">
-                  <h5 className="mb-3 fw-bold text-white">🔄 Recent Operations</h5>
+                  <h5 className="mb-3 fw-bold text-white"> Recent Operations</h5>
                   {recentOrders.length === 0 ? (
                     <div className="text-center text-muted-custom py-4">
                       No recent orders recorded.

@@ -96,7 +96,7 @@ function Products() {
         {/* Form Card */}
         <div className="glass-card p-4 mb-4">
           <h5 className="mb-4 text-white fw-bold">
-            {selectedProduct ? "⚙️ Modify Product Entry" : "➕ Register New Product"}
+            {selectedProduct ? "⚙ Modify Product Entry" : " Register New Product"}
           </h5>
           <form onSubmit={save} className="row g-3">
             <div className="col-md-6 col-lg-4">
@@ -167,7 +167,7 @@ function Products() {
 
         {/* Data Table */}
         <div className="glass-card p-4">
-          <h5 className="mb-4 text-white fw-bold">📦 Product Inventory Catalog</h5>
+          <h5 className="mb-4 text-white fw-bold"> Product Inventory Catalog</h5>
           {loading ? (
             <div className="text-center text-muted-custom py-4">Loading products...</div>
           ) : products.length === 0 ? (
@@ -201,10 +201,10 @@ function Products() {
                       </td>
                       <td className="text-end">
                         <button className="btn btn-sm btn-primary-custom me-2 px-2.5 py-1.5 rounded" onClick={() => edit(product)}>
-                          ✏️ Edit
+                           Edit
                         </button>
                         <button className="btn btn-sm btn-danger-custom px-2.5 py-1.5 rounded" onClick={() => remove(product.productId)}>
-                          🗑️ Delete
+                           Delete
                         </button>
                       </td>
                     </tr>

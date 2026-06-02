@@ -33,6 +33,7 @@ function Login() {
       } else {
         const response = await login({ email, password });
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("role", response.data.role || "ADMIN");
         navigate("/dashboard", { replace: true });
       }
     } catch (error) {
@@ -123,7 +124,7 @@ function Login() {
               className="form-control-custom"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@noble-tesla.com"
+              placeholder="noble_tesla@gmail.com"
               required
             />
           </div>
