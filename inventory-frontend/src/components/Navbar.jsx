@@ -30,4 +30,4 @@ function Navbar({ title, role }) { // <-- Add 'role' to the props
   );
 }
 
-export default Navbar;
+export default Navbar; 
